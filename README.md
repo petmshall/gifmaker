@@ -13,7 +13,7 @@ bash gifmaker.sh input output quality [resolution] [framerate]
 <br/>
 <b>2 / low:</b> 240p 15fps (Recommended for internet use)
 <br/>
-<b>3 / medium:</b> 360p 15fps
+<b>3 / medium:</b> 360p 15fps (Best balance of quality vs file size and speed)
 <br/>
 <b>4 / high:</b> 480p 20fps (More resources but still acceptable)
 <br/>
