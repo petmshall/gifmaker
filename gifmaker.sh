@@ -55,17 +55,23 @@ rot=$(ffprobe -v error -select_streams v:0 -show_entries stream_tags=rotate -of 
 res=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 $1)
 vx=${res%x*}
 vy=${res#*x}
-if [ "x"$rot == "x90" ] || [ "x"$rot == "x-90" ]; then
-t=$vx
-vx=$vy
-vy=$t
-fi
 if [ $((vx)) -gt $((vy)) ]; then
 x=$maxwidth
-y=$((vy/(vx/x)/2*2))
+echo $x"*("$vy"/"$vx")"
+y=$(echo $x"*("$vy"/"$vx")" | bc -l)
+y=${y%.*}
+y=$((y/2*2))
 else
 y=$maxwidth
-x=$((vx/(vy/y)/2*2))
+x=$(echo $y"*("$vx"/"$vy")" | bc -l)
+x=${x%.*}
+x=$((x/2*2))
+fi
+
+if [ "x"$rot == "x90" ] || [ "x"$rot == "x-90" ]; then
+t=$x
+x=$y
+y=$t
 fi
 
 echo "Video converted from "$vx"x"$vy" to "$x"x"$y
@@ -73,11 +79,11 @@ echo "Video converted from "$vx"x"$vy" to "$x"x"$y
 mkdir .gifmaker
 
 echo "Stage 1: Resizing video"
-ffmpeg -i $1 -s "$x"x"$y" -r $fps -an .gifmaker/resized.mp4
+ffmpeg -i $1 -s "$x"x"$y" -r $fps -an .gifmaker/resized.mkv
 echo "Stage 2: Generating pallette"
-ffmpeg -i .gifmaker/resized.mp4 -filter_complex "[0:v] palettegen" .gifmaker/pallette.png
+ffmpeg -i .gifmaker/resized.mkv -filter_complex "[0:v] palettegen" .gifmaker/pallette.png
 echo "Stage 3: Converting video"
-ffmpeg -i .gifmaker/resized.mp4 -i .gifmaker/pallette.png -filter_complex "[0:v][1:v] paletteuse" -f gif $2
+ffmpeg -i .gifmaker/resized.mkv -i .gifmaker/pallette.png -filter_complex "[0:v][1:v] paletteuse" -f gif $2
 
 rm -r .gifmaker
 
